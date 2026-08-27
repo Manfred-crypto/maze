@@ -18,7 +18,8 @@
             height: 100vh;
             margin: 0;
         }
-        h1 { margin-bottom: 10px; }
+        h1 { margin-bottom: 5px; }
+        p { margin-top: 0; color: #888; }
         #maze-container {
             background-color: #2d2d2d;
             padding: 20px;
@@ -32,7 +33,6 @@
 </head>
 <body>
     <h1>Python Maze Generator</h1>
-    <p>Generated live in your browser using PyScript!</p>
     <div id="maze-container">Loading maze...</div>
     <script type="py">
         import random
@@ -71,19 +71,36 @@
                         stack.append(n_idx)
                     else:
                         stack.pop()
-                return self.grid
+                self.grid[0] &= ~(1 << 0)
+                max_idx=(self.size * self.size) - 1
+                self.grid[max_idx] &= ~(1 << 2)
+            return self.grid
             def to_ascii(self):
-                output="+" + "---+" * self.size + "\n"
+                output=""
+                for c in range(self.size):
+                    if c==0:
+                        output+="+   "
+                    else:
+                        output+="+---"
+                output+="+\n"
+
                 for r in range(self.size):
                     row_line="|"
                     bottom_line="+"
                     for c in range(self.size):
                         idx=r * self.size + c
                         cell=self.grid[idx]
-                        row_line += "   |" if (cell & (1 << 1)) else "    "
-                        bottom_line += "---+" if (cell & (1 << 2)) else "   +"
-                    output += row_line + "\n" + bottom_line + "\n"
+                        if cell & (1 << 1):
+                            row_line+="   |"
+                        else:
+                            row_line+="    "
+                        if cell & (1 << 2):
+                            bottom_line+="---+"
+                        else:
+                            bottom_line+="   +"
+                    output+=row_line + "\n" + bottom_line + "\n"
                 return output
+
         gen=MazeGenerator(10)
         gen.generate()
         document.getElementById("maze-container").innerText=gen.to_ascii()
