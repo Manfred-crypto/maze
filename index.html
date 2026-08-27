@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Generator</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { margin-bottom: 10px; }
+        #maze-container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            white-space: pre;
+            line-height: 1.2;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Python Maze Generator</h1>
+    <p>Generated live in your browser using PyScript!</p>
+    <div id="maze-container">Loading maze...</div>
+    <script type="py">
+        import random
+        from pyscript import document
+        class MazeGenerator:
+            def __init__(self, size=10):
+                self.size=size
+                self.grid=[15] * (size * size)
+            def get_neighbors(self, idx):
+                neighbors=[]
+                row, col=divmod(idx, self.size)
+                dirs=[
+                    (-self.size, 0, 2),
+                    (1, 1, 3),
+                    (self.size, 2, 0),
+                    (-1, 3, 1)
+                ]
+                for offset, wall_curr, wall_neigh in dirs:
+                    n_idx=idx + offset
+                    if 0 <= n_idx < self.size * self.size:
+                        if offset==1 and col==self.size - 1: continue
+                        if offset==-1 and col==0: continue
+                        neighbors.append((n_idx, wall_curr, wall_neigh))
+                return neighbors
+            def generate(self):
+                stack=[0]
+                visited={0}
+                while stack:
+                    curr=stack[-1]
+                    unvisited_neighbors=[n for n in self.get_neighbors(curr) if n[0] not in visited]
+                    if unvisited_neighbors:
+                        n_idx, w_curr, w_neigh=random.choice(unvisited_neighbors)
+                        self.grid[curr] &= ~(1 << w_curr)
+                        self.grid[n_idx] &= ~(1 << w_neigh)
+                        visited.add(n_idx)
+                        stack.append(n_idx)
+                    else:
+                        stack.pop()
+                return self.grid
+            def to_ascii(self):
+                output="+" + "---+" * self.size + "\n"
+                for r in range(self.size):
+                    row_line="|"
+                    bottom_line="+"
+                    for c in range(self.size):
+                        idx=r * self.size + c
+                        cell=self.grid[idx]
+                        row_line += "   |" if (cell & (1 << 1)) else "    "
+                        bottom_line += "---+" if (cell & (1 << 2)) else "   +"
+                    output += row_line + "\n" + bottom_line + "\n"
+                return output
+        gen=MazeGenerator(10)
+        gen.generate()
+        document.getElementById("maze-container").innerText=gen.to_ascii()
+    </script>
+</body>
+</html>
