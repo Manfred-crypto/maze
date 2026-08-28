@@ -74,7 +74,7 @@
                 self.grid[0] &= ~(1 << 0)
                 max_idx=(self.size * self.size) - 1
                 self.grid[max_idx] &= ~(1 << 2)
-            return self.grid
+                return self.grid
             def to_ascii(self):
                 output=""
                 for c in range(self.size):
@@ -83,7 +83,6 @@
                     else:
                         output+="+---"
                 output+="+\n"
-
                 for r in range(self.size):
                     row_line="|"
                     bottom_line="+"
@@ -100,7 +99,6 @@
                             bottom_line+="   +"
                     output+=row_line + "\n" + bottom_line + "\n"
                 return output
-
         gen=MazeGenerator(10)
         gen.generate()
         document.getElementById("maze-container").innerText=gen.to_ascii()
